@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Основа</title>
+<style>
+  :root {
+    --bg: #ECEEEA;
+    --surface: #FFFFFF;
+    --ink: #23292B;
+    --muted: #6E7773;
+    --faint: #A4ABA6;
+    --line: #E1E4DF;
+    --done: #4C7A6A;
+    --done-soft: #E4EEE9;
+    --attention: #B07B32;
+    --attention-soft: #F5EBDA;
+    --slip: #C08A3E;
+    --shadow: 0 1px 2px rgba(30,40,35,.04), 0 6px 18px rgba(30,40,35,.05);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    padding: 28px 18px 60px;
+  }
+
+  .wrap { max-width: 620px; margin: 0 auto; }
+
+  /* Header */
+  header { margin-bottom: 22px; padding: 0 4px; }
+  .date {
+    font-size: 13px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--faint);
+    font-weight: 600;
+  }
+  h1 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 30px;
+    font-weight: 400;
+    letter-spacing: -.01em;
+    margin: 4px 0 10px;
+  }
+  .rule {
+    font-size: 14px;
+    color: var(--muted);
+    max-width: 92%;
+  }
+  .rule b { color: var(--ink); font-weight: 600; }
+
+  /* Attention banner */
+  .banner {
+    display: none;
+    margin: 16px 4px 0;
+    padding: 11px 14px;
+    background: var(--attention-soft);
+    border-radius: 12px;
+    font-size: 13.5px;
+    color: var(--attention);
+    line-height: 1.45;
+  }
+  .banner.show { display: block; }
+
+  /* Cards */
+  .cards { margin-top: 20px; display: flex; flex-direction: column; gap: 14px; }
+
+  .card {
+    background: var(--surface);
+    border-radius: 18px;
+    padding: 18px 18px 16px;
+    box-shadow: var(--shadow);
+    transition: box-shadow .2s;
+  }
+  .card.needs { box-shadow: 0 0 0 1.5px var(--attention-soft), var(--shadow); }
+
+  .card-top { display: flex; align-items: flex-start; gap: 14px; }
+  .card-main { flex: 1; min-width: 0; }
+
+  .name {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 20px;
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .floor {
+    font-size: 13.5px;
+    color: var(--muted);
+    margin-top: 3px;
+  }
+  .floor b { color: var(--ink); font-weight: 600; }
+
+  /* Toggle */
+  .toggle {
+    flex-shrink: 0;
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    border: 2px solid var(--line);
+    background: transparent;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .18s ease;
+    color: transparent;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .toggle:hover { border-color: var(--done); }
+  .toggle.on {
+    background: var(--done);
+    border-color: var(--done);
+    color: #fff;
+  }
+  .toggle svg { width: 22px; height: 22px; }
+  .toggle:focus-visible { outline: 2px solid var(--done); outline-offset: 2px; }
+
+  /* Tip */
+  .tip {
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.55;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+  }
+  .tip b { color: var(--ink); font-weight: 600; }
+
+  /* History */
+  .history {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: nowrap;
+  }
+  .strip { display: flex; gap: 3px; flex-shrink: 1; overflow: hidden; }
+  .day {
+    width: 13px; height: 13px;
+    border-radius: 3px;
+    background: var(--line);
+    flex-shrink: 0;
+  }
+  .day.done { background: var(--done); }
+  .day.slip { background: var(--slip); }
+  .day.today { box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--faint); }
+  .streak {
+    font-size: 12.5px;
+    color: var(--faint);
+    white-space: nowrap;
+    font-weight: 600;
+    letter-spacing: .01em;
+    flex-shrink: 0;
+  }
+  .streak b { color: var(--done); font-size: 15px; }
+
+  /* Focus card specifics */
+  .focus-actions { display: flex; gap: 8px; margin-top: 14px; }
+  .btn {
+    flex: 1;
+    padding: 11px;
+    border-radius: 12px;
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-clean { background: var(--done-soft); color: var(--done); }
+  .btn-clean.active { background: var(--done); color: #fff; }
+  .btn-slip { background: #F1F1EE; color: var(--muted); }
+  .btn-slip.active { background: var(--attention-soft); color: var(--attention); }
+  .btn:focus-visible { outline: 2px solid var(--done); outline-offset: 2px; }
+
+  .protocol {
+    margin-top: 14px;
+    padding-top: 13px;
+    border-top: 1px solid var(--line);
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .protocol summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--ink);
+    font-size: 13px;
+    list-style: none;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .protocol summary::-webkit-details-marker { display: none; }
+  .protocol summary::before { content: "→"; color: var(--faint); transition: transform .2s; }
+  .protocol[open] summary::before { transform: rotate(90deg); }
+  .protocol ol { margin: 10px 0 4px 18px; }
+  .protocol li { margin-bottom: 7px; }
+  .protocol .return {
+    margin-top: 8px;
+    padding: 10px 12px;
+    background: var(--done-soft);
+    border-radius: 10px;
+    color: var(--done);
+    font-weight: 500;
+  }
+
+  footer {
+    margin-top: 34px;
+    text-align: center;
+    font-size: 11.5px;
+    color: var(--faint);
+    line-height: 1.6;
+  }
+  footer a { color: var(--muted); cursor: pointer; text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="date" id="date"></div>
+    <h1>Основа</h1>
+    <p class="rule">Не потолок, а пол. Задача не в том, чтобы сделать много, а в том, чтобы сесть и начать. <b>Правило одно: не пропускать дважды подряд.</b></p>
+    <div class="banner" id="banner"></div>
+  </header>
+
+  <div class="cards" id="cards"></div>
+
+  <footer>
+    Прогресс сохраняется в этом браузере. Не чисти историю сайтов для этого файла.<br>
+    <a id="reset">сбросить всё</a>
+  </footer>
+</div>
+
+<script>
+// ---------- data ----------
+const KEY = "osnova_v1";
+function load(){ try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e){ return {}; } }
+function save(d){ localStorage.setItem(KEY, JSON.stringify(d)); }
+let data = load();
+
+function dkey(dt){
+  const y=dt.getFullYear(), m=String(dt.getMonth()+1).padStart(2,'0'), d=String(dt.getDate()).padStart(2,'0');
+  return `${y}-${m}-${d}`;
+}
+const TODAY = dkey(new Date());
+
+// ---------- config ----------
+const PILLARS = [
+  {
+    id: "learning",
+    name: "Учёба",
+    floor: "Сесть за материал и сделать один шаг вперёд. Минимум — <b>10 минут</b>.",
+    tip: "Не ставь цель «выучить». Цель — просто оказаться внутри и начать. Первые <b>2 минуты</b> — самое сложное, дальше почти всегда идёт само. Один шаг вперёд — день засчитан. Ты не обязан знать весь путь, обязан только сегодня продвинуться на шаг. Дорога проявляется под ногами, а не в голове."
+  },
+  {
+    id: "english",
+    name: "Английский",
+    floor: "10 минут контакта с английским. Любого.",
+    tip: "Не «учить» — а быть в контакте. 10 минут чего угодно на английском. <b>На выходных вместо ютуба запусти GTA на английском</b> — это и отдых, и практика сразу. Так выходные перестают уходить в никуда."
+  },
+  {
+    id: "health",
+    name: "Тело",
+    floor: "Зарядка + турник. Даже 3 подтягивания считается.",
+    tip: "Здесь твоё правило уже работает — не рви серию. В плохой день минимум: выйти и повисеть или сделать <b>3 подтягивания</b>. Этого достаточно, чтобы день был закрыт. Не два пропуска подряд."
+  }
+];
+
+const FOCUS = {
+  id: "focus",
+  name: "Фокус",
+  floor: "Тяга приходит утром и днём — от стресса или скуки. Это не про порно, это попытка сбежать от состояния. Дай ему другой выход."
+};
+
+// ---------- helpers ----------
+function isDone(id, k){ return data[id] && data[id][k] === true; }
+function focusState(k){ return data.focus && data.focus[k]; } // 'clean' | 'slip' | undefined
+
+function prevKey(k, n=1){
+  const dt = new Date(k+"T00:00:00");
+  dt.setDate(dt.getDate()-n);
+  return dkey(dt);
+}
+
+function streak(id, focus=false){
+  let s = 0;
+  let dt = new Date();
+  const done = focus ? focusState(TODAY)==='clean' : isDone(id, TODAY);
+  if(!done) dt.setDate(dt.getDate()-1);
+  while(true){
+    const k = dkey(dt);
+    const ok = focus ? focusState(k)==='clean' : isDone(id, k);
+    if(ok){ s++; dt.setDate(dt.getDate()-1); } else break;
+  }
+  return s;
+}
+
+// missed yesterday & not resolved today -> attention
+function needsAttention(id, focus=false){
+  const y = prevKey(TODAY);
+  if(focus){
+    return focusState(y)==='slip' && focusState(TODAY)!=='clean';
+  }
+  return !isDone(id, y) && !isDone(id, TODAY);
+}
+
+function last14(id, focus=false){
+  const arr = [];
+  const now = new Date();
+  for(let i=13;i>=0;i--){
+    const dt = new Date(now); dt.setDate(now.getDate()-i);
+    const k = dkey(dt);
+    let cls = "day";
+    if(focus){
+      if(focusState(k)==='clean') cls+=" done";
+      else if(focusState(k)==='slip') cls+=" slip";
+    } else if(isDone(id,k)) cls+=" done";
+    if(k===TODAY) cls+=" today";
+    arr.push(`<span class="${cls}"></span>`);
+  }
+  return arr.join("");
+}
+
+const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+
+// ---------- render ----------
+function render(){
+  // date
+  const dt = new Date();
+  const days = ["воскресенье","понедельник","вторник","среда","четверг","пятница","суббота"];
+  const months = ["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
+  document.getElementById("date").textContent =
+    `${days[dt.getDay()]}, ${dt.getDate()} ${months[dt.getMonth()]}`;
+
+  const isWeekend = dt.getDay()===0 || dt.getDay()===6;
+
+  // banner
+  const missed = [];
+  PILLARS.forEach(p=>{ if(needsAttention(p.id)) missed.push(p.name.toLowerCase()); });
+  if(needsAttention("focus", true)) missed.push("фокус");
+  const banner = document.getElementById("banner");
+  if(missed.length){
+    banner.classList.add("show");
+    banner.innerHTML = `Вчера пропущено: <b>${missed.join(", ")}</b>. Сегодня — важный день: второй пропуск подряд как раз и превращает срыв в яму. Сделай минимум.`;
+  } else {
+    banner.classList.remove("show");
+  }
+
+  const container = document.getElementById("cards");
+  container.innerHTML = "";
+
+  // normal pillars
+  PILLARS.forEach(p=>{
+    const done = isDone(p.id, TODAY);
+    const needs = needsAttention(p.id);
+    let tip = p.tip;
+    if(p.id==="english" && isWeekend){
+      tip = "Сегодня выходной — лучший день для GTA на английском. Запусти вместо ютуба, играй без русских субтитров сколько идёт. Это и есть занятие. " + tip;
+    }
+    const el = document.createElement("div");
+    el.className = "card" + (needs && !done ? " needs":"");
+    el.innerHTML = `
+      <div class="card-top">
+        <div class="card-main">
+          <div class="name">${p.name}</div>
+          <div class="floor">${p.floor}</div>
+        </div>
+        <button class="toggle ${done?'on':''}" data-id="${p.id}" aria-label="Отметить ${p.name}">${CHECK}</button>
+      </div>
+      <div class="tip">${tip}</div>
+      <div class="history">
+        <div class="strip">${last14(p.id)}</div>
+        <div class="streak">серия <b>${streak(p.id)}</b> дн.</div>
+      </div>`;
+    container.appendChild(el);
+  });
+
+  // focus card
+  const fState = focusState(TODAY);
+  const fNeeds = needsAttention("focus", true);
+  const fEl = document.createElement("div");
+  fEl.className = "card" + (fNeeds ? " needs":"");
+  fEl.innerHTML = `
+    <div class="card-top">
+      <div class="card-main">
+        <div class="name">${FOCUS.name}</div>
+        <div class="floor">${FOCUS.floor}</div>
+      </div>
+    </div>
+    <div class="focus-actions">
+      <button class="btn btn-clean ${fState==='clean'?'active':''}" data-focus="clean">Чисто сегодня</button>
+      <button class="btn btn-slip ${fState==='slip'?'active':''}" data-focus="slip">Был срыв</button>
+    </div>
+    <details class="protocol" ${fState==='slip'?'open':''}>
+      <summary>Что делать в момент тяги</summary>
+      <ol>
+        <li><b>Телефон из рук.</b> Физически убери подальше — тяга живёт на устройстве, не в тебе.</li>
+        <li><b>4-7-8</b>, несколько циклов. Ты это уже умеешь.</li>
+        <li><b>Через тело, не через голову:</b> выйти во двор, повисеть или подтянуться, холодная вода на лицо, стакан воды. Состоянию нужен выход, а не борьба.</li>
+      </ol>
+      <div class="return">Если сорвался — день не потерян. Отметь честно, сделай 10 минут учёбы прямо сейчас. Это и есть возврат. Один раз почти ничего не стоит — стоит только второй подряд.</div>
+    </details>
+    <div class="history">
+      <div class="strip">${last14("focus", true)}</div>
+      <div class="streak">чисто <b>${streak("focus", true)}</b> дн.</div>
+    </div>`;
+  container.appendChild(fEl);
+
+  bind();
+}
+
+function bind(){
+  document.querySelectorAll(".toggle").forEach(b=>{
+    b.onclick = ()=>{
+      const id = b.dataset.id;
+      data[id] = data[id] || {};
+      data[id][TODAY] = !data[id][TODAY];
+      save(data); render();
+    };
+  });
+  document.querySelectorAll("[data-focus]").forEach(b=>{
+    b.onclick = ()=>{
+      const v = b.dataset.focus;
+      data.focus = data.focus || {};
+      data.focus[TODAY] = (data.focus[TODAY]===v) ? undefined : v;
+      save(data); render();
+    };
+  });
+}
+
+document.getElementById("reset").onclick = ()=>{
+  if(confirm("Стереть всю историю? Это нельзя отменить.")){
+    localStorage.removeItem(KEY); data = {}; render();
+  }
+};
+
+render();
+</script>
+</body>
+</html>
