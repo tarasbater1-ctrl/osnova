@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="4·7·8">
+<meta name="theme-color" content="#0d1117">
+<title>4·7·8 Дыхание</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  :root{
+    --bg:#0d1117;
+    --surface:#161b22;
+    --border:#30363d;
+    --text:#e6edf3;
+    --muted:#8b949e;
+    --blue:#58a6ff;
+    --blue-dim:#1f3450;
+    --teal:#3fb950;
+    --teal-dim:#1a3626;
+    --orange:#f0883e;
+    --orange-dim:#3d2008;
+  }
+  html,body{
+    height:100%;
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,'SF Pro Display',BlinkMacSystemFont,'Segoe UI',sans-serif;
+    overscroll-behavior:none;
+    user-select:none;
+  }
+  body{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    min-height:100dvh;
+    padding:env(safe-area-inset-top,20px) 20px env(safe-area-inset-bottom,20px);
+    gap:0;
+  }
+  .app{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:28px;
+    width:100%;
+    max-width:360px;
+  }
+  .header{
+    text-align:center;
+  }
+  .title{
+    font-size:32px;
+    font-weight:300;
+    letter-spacing:8px;
+    color:var(--text);
+  }
+  .subtitle{
+    font-size:12px;
+    color:var(--muted);
+    letter-spacing:2px;
+    text-transform:uppercase;
+    margin-top:6px;
+  }
+  .ring-wrap{
+    position:relative;
+    width:260px;
+    height:260px;
+    flex-shrink:0;
+  }
+  .ring-wrap svg{
+    position:absolute;inset:0;width:100%;height:100%;overflow:visible;
+  }
+  .center{
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    pointer-events:none;
+  }
+  .phase-lbl{
+    font-size:15px;
+    font-weight:400;
+    color:var(--muted);
+    letter-spacing:1px;
+    text-transform:uppercase;
+    transition:color .4s;
+  }
+  .phase-num{
+    font-size:64px;
+    font-weight:200;
+    line-height:1;
+    letter-spacing:-2px;
+    transition:color .4s;
+  }
+  .steps{
+    display:flex;
+    gap:10px;
+    width:100%;
+  }
+  .step{
+    flex:1;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:12px 8px;
+    text-align:center;
+    transition:background .3s,border-color .3s;
+  }
+  .step-n{
+    font-size:22px;
+    font-weight:300;
+    display:block;
+  }
+  .step-l{
+    font-size:10px;
+    color:var(--muted);
+    letter-spacing:1px;
+    text-transform:uppercase;
+    display:block;
+    margin-top:3px;
+  }
+  .step.active-blue{background:var(--blue-dim);border-color:var(--blue);}
+  .step.active-blue .step-n{color:var(--blue);}
+  .step.active-teal{background:var(--teal-dim);border-color:var(--teal);}
+  .step.active-teal .step-n{color:var(--teal);}
+  .step.active-orange{background:var(--orange-dim);border-color:var(--orange);}
+  .step.active-orange .step-n{color:var(--orange);}
+  .btn{
+    width:100%;
+    padding:18px;
+    border-radius:16px;
+    border:1px solid var(--border);
+    background:var(--surface);
+    color:var(--text);
+    font-size:17px;
+    font-weight:400;
+    letter-spacing:.5px;
+    cursor:pointer;
+    transition:background .15s,border-color .15s,transform .1s;
+    -webkit-appearance:none;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn.running{background:rgba(240,136,62,.1);border-color:var(--orange);color:var(--orange);}
+  .footer{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:13px;
+    color:var(--muted);
+  }
+  .dot{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--muted);
+    transition:background .4s;
+  }
+  .dot.blue{background:var(--blue);}
+  .dot.teal{background:var(--teal);}
+  .dot.orange{background:var(--orange);}
+  .tip{
+    position:fixed;
+    bottom:env(safe-area-inset-bottom,12px);
+    left:0;right:0;
+    text-align:center;
+    font-size:11px;
+    color:var(--muted);
+    padding:8px;
+    opacity:.5;
+    pointer-events:none;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="title">4 · 7 · 8</div>
+    <div class="subtitle">дыхательная техника</div>
+  </div>
+
+  <div class="ring-wrap">
+    <svg viewBox="0 0 260 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="130" cy="130" r="110" stroke="#30363d" stroke-width="1"/>
+      <circle cx="130" cy="130" r="110" stroke="#30363d" stroke-width="14" opacity=".3"/>
+      <circle id="prog" cx="130" cy="130" r="110"
+        stroke="#58a6ff" stroke-width="14" stroke-linecap="round"
+        stroke-dasharray="691" stroke-dashoffset="691"
+        transform="rotate(-90 130 130)"
+        style="transition:stroke .4s;"/>
+      <circle id="bCircle" cx="130" cy="130" r="54"
+        fill="#1f3450"
+        style="transition:r .05s linear, fill .4s;"/>
+    </svg>
+    <div class="center">
+      <span class="phase-lbl" id="pLbl">нажмите старт</span>
+      <span class="phase-num" id="pNum" style="color:var(--muted)">—</span>
+    </div>
+  </div>
+
+  <div class="steps">
+    <div class="step" id="s0"><span class="step-n">4</span><span class="step-l">вдох</span></div>
+    <div class="step" id="s1"><span class="step-n">7</span><span class="step-l">задержка</span></div>
+    <div class="step" id="s2"><span class="step-n">8</span><span class="step-l">выдох</span></div>
+  </div>
+
+  <button class="btn" id="mainBtn" onclick="toggle()">Старт</button>
+
+  <div class="footer">
+    <div class="dot" id="dot"></div>
+    <span id="cyclesTxt">циклов: 0</span>
+  </div>
+</div>
+
+<div class="tip">Для iPhone: поделиться → «На экран домой»</div>
+
+<script>
+const PHASES=[
+  {name:'вдох',    dur:4,  rMin:40,rMax:90, color:'#58a6ff',fill:'#1f3450',dot:'blue',   cls:'active-blue'},
+  {name:'задержка',dur:7,  rMin:90,rMax:90, color:'#3fb950',fill:'#1a3626',dot:'teal',   cls:'active-teal'},
+  {name:'выдох',   dur:8,  rMin:90,rMax:40, color:'#f0883e',fill:'#3d2008',dot:'orange', cls:'active-orange'},
+];
+const C=2*Math.PI*110;
+const prog=document.getElementById('prog');
+const bc=document.getElementById('bCircle');
+const pLbl=document.getElementById('pLbl');
+const pNum=document.getElementById('pNum');
+const btn=document.getElementById('mainBtn');
+const steps=[document.getElementById('s0'),document.getElementById('s1'),document.getElementById('s2')];
+const dot=document.getElementById('dot');
+const cyclesTxt=document.getElementById('cyclesTxt');
+let running=false,timer=null,ph=0,el=0,cycles=0;
+
+function render(p,t){
+  const phase=PHASES[p];
+  const frac=t/phase.dur;
+  const r=phase.rMin+(phase.rMax-phase.rMin)*frac;
+  let offset;
+  if(p===0) offset=C*(1-frac);
+  else if(p===1) offset=0;
+  else offset=C*frac;
+  prog.style.strokeDashoffset=offset;
+  prog.setAttribute('stroke',phase.color);
+  bc.setAttribute('r',r);
+  bc.style.fill=phase.fill;
+  pLbl.textContent=phase.name;
+  pLbl.style.color=phase.color;
+  pNum.textContent=Math.max(1,Math.ceil(phase.dur-t));
+  pNum.style.color=phase.color;
+  steps.forEach((s,i)=>{
+    s.className='step';
+    if(i===p) s.classList.add(phase.cls);
+  });
+  dot.className='dot '+phase.dot;
+}
+
+function tick(){
+  el+=0.05;
+  if(el>=PHASES[ph].dur){
+    el=0;ph=(ph+1)%3;
+    if(ph===0){cycles++;cyclesTxt.textContent='циклов: '+cycles;}
+  }
+  render(ph,el);
+}
+
+function toggle(){
+  if(running){
+    clearInterval(timer);running=false;
+    btn.textContent='Старт';btn.classList.remove('running');
+    ph=0;el=0;
+    pLbl.textContent='нажмите старт';pLbl.style.color='';
+    pNum.textContent='—';pNum.style.color='var(--muted)';
+    prog.style.strokeDashoffset=C;
+    bc.setAttribute('r',54);bc.style.fill='#1f3450';
+    steps.forEach(s=>s.className='step');
+    dot.className='dot';
+  } else {
+    running=true;btn.textContent='Стоп';btn.classList.add('running');
+    timer=setInterval(tick,50);tick();
+  }
+}
+
+if('serviceWorker' in navigator){
+  const sw=`self.addEventListener('fetch',e=>{});`;
+  const blob=new Blob([sw],{type:'application/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
+}
+</script>
+</body>
+</html>
